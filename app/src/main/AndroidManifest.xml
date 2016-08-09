@@ -19,15 +19,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".InputActivity"
-            android:label="タスク"
+            android:label="タスク1"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="jp.techacademy.kiyoshi.ooyama.taskapp.MainActivity"/>
         </activity>
+
+        <receiver android:name=".TaskAlarmReceiver" />
+
     </application>
 
 </manifest>
