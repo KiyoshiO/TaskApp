@@ -1,6 +1,7 @@
 package jp.techacademy.kiyoshi.ooyama.taskapp;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,10 +9,14 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -37,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ListView mListView;
     private TaskAdapter mTaskAdapter;
-
+    private EditText editText;
 
 
     @Override
@@ -45,6 +50,21 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        editText=(EditText)findViewById(R.id.edt);
+        editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                // EditTextのフォーカスが外れた場合
+                if (hasFocus == false) {
+                    softKeyOff(v);
+                    //抽出
+                    execCategoryFilter();
+                }
+            }
+        });
+
+
+        //タスク追加
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -53,6 +73,31 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        //カテゴリ検索
+        Button button=(Button)findViewById(R.id.categoryFilter);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                execCategoryFilter();
+                softKeyOff(v);
+            }
+        });
+
+
+        //カテゴリ検索クリア
+        Button buttonClear=(Button)findViewById(R.id.categoryFilterClear);
+        buttonClear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                editText.setText("");
+                mTaskRealmResults = mRealm.where(Task.class).findAll();
+                mTaskRealmResults.sort("date", Sort.DESCENDING);
+                reloadListView();
+            }
+        });
+
+
 
         // Realmの設定
         mRealm = Realm.getDefaultInstance();
@@ -70,10 +115,8 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // 入力・編集する画面に遷移させる
                 Task task = (Task) parent.getAdapter().getItem(position);
-
                 Intent intent = new Intent(MainActivity.this, InputActivity.class);
                 intent.putExtra(EXTRA_TASK, task);
-
                 startActivity(intent);
             }
         });
@@ -82,21 +125,16 @@ public class MainActivity extends AppCompatActivity {
         mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-
                 // タスクを削除する
                 final Task task = (Task) parent.getAdapter().getItem(position);
-
                 // ダイアログを表示する
                 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-
                 builder.setTitle("削除");
                 builder.setMessage(task.getTitle() + "を削除しますか");
                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
                         RealmResults<Task> results = mRealm.where(Task.class).equalTo("id", task.getId()).findAll();
-
                         mRealm.beginTransaction();
                         results.clear();
                         mRealm.commitTransaction();
@@ -108,8 +146,6 @@ public class MainActivity extends AppCompatActivity {
 
                 AlertDialog dialog = builder.create();
                 dialog.show();
-
-
                 return true;
             }
         });
@@ -118,24 +154,23 @@ public class MainActivity extends AppCompatActivity {
             // アプリ起動時にタスクの数が0であった場合は表示テスト用のタスクを作成する
             addTaskForTest();
         }
-
         reloadListView();
-
     }
 
-    /*
-    private void reloadListView(){
-        //後でTaskクラスに変更
-        ArrayList<String> taskArrayList = new ArrayList<>();
-        taskArrayList.add("aaa");
-        taskArrayList.add("bbb");
-        taskArrayList.add("ccc");
-
-        mTaskAdapter.setTaskArrayList(taskArrayList);
-        mListView.setAdapter(mTaskAdapter);
-        mTaskAdapter.notifyDataSetChanged();
+    private void softKeyOff(View v){
+        // ソフトキーボードを非表示にする
+        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        Log.d("TaskApp","ソフトキーオフ");
     }
-    */
+
+    private void execCategoryFilter(){
+        String filterCategory=editText.getText().toString();
+        Log.d("TaskApp",filterCategory);
+        mTaskRealmResults = mRealm.where(Task.class).equalTo("category",filterCategory).findAll();
+        reloadListView();
+    }
+
 
     private void reloadListView() {
 
@@ -148,6 +183,7 @@ public class MainActivity extends AppCompatActivity {
             task.setTitle(mTaskRealmResults.get(i).getTitle());
             task.setContents(mTaskRealmResults.get(i).getContents());
             task.setDate(mTaskRealmResults.get(i).getDate());
+            task.setCategory(mTaskRealmResults.get(i).getCategory());
 
             taskArrayList.add(task);
         }

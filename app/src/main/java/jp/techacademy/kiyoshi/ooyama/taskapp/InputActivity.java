@@ -26,6 +26,7 @@ public class InputActivity extends AppCompatActivity {
     private Button mDateButton, mTimeButton;
     private EditText mTitleEdit, mContentEdit, mCategoryEdit;
     private Task mTask;
+
     private View.OnClickListener mOnDateClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {

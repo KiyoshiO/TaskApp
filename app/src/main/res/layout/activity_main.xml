@@ -8,10 +8,45 @@
     android:fitsSystemWindows="true"
     tools:context="jp.techacademy.kiyoshi.ooyama.taskapp.MainActivity">
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <EditText
+        android:layout_alignParentTop="true"
+        android:id="@+id/edt"
+        android:layout_marginRight="30dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:width="250dp"
+        android:inputType="text"
+        android:layout_alignBottom="@+id/categoryFilter"
+        android:layout_toStartOf="@+id/categoryFilter" />
+
+        <Button
+            android:id="@+id/categoryFilter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="抽出"
+            android:layout_alignParentTop="true"
+            android:layout_toStartOf="@+id/categoryFilterClear" />
+
+        <Button
+            android:id="@+id/categoryFilterClear"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="クリア"
+            android:layout_alignParentEnd="true" />
+
     <ListView
         android:id="@+id/listView1"
+        android:layout_below="@id/edt"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"/>
+
+    </RelativeLayout>
+
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
@@ -21,5 +56,6 @@
         android:layout_margin="16dp"
         android:src="@drawable/plus"
         app:backgroundTint="@color/colorPrimary"/>
+
 
 </android.support.design.widget.CoordinatorLayout>
