@@ -1,6 +1,8 @@
 package jp.techacademy.kiyoshi.ooyama.taskapp;
 
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -20,6 +22,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -138,6 +141,14 @@ public class MainActivity extends AppCompatActivity {
                         mRealm.beginTransaction();
                         results.clear();
                         mRealm.commitTransaction();
+
+                        //アラーム削除
+                        Intent resultIntent = new Intent(getApplicationContext(),TaskAlarmReceiver.class);
+                        resultIntent.putExtra(MainActivity.EXTRA_TASK,task);
+                        PendingIntent resultPendingIntent = PendingIntent.getBroadcast(getApplicationContext(),task.getId(),resultIntent,PendingIntent.FLAG_UPDATE_CURRENT);
+
+                        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                        alarmManager.cancel(resultPendingIntent);
 
                         reloadListView();
                     }
